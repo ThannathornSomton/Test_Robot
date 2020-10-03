@@ -2,8 +2,15 @@ World myRobotWorld;  //Set myRobotWorld as object of World
 boolean load = true;
 int[][] data = new int[23][2];
 float[][] data1 = new float[1][2];
+
 void setup() {
   size(720, 720);
+  readFile();
+  if(load){myRobotWorld = new World(data[0][0],data[0][1]);}
+  else{myRobotWorld = new World(12,12);}
+}
+
+void readFile(){
   BufferedReader reader = createReader("SaveWorld.txt");
   String line = null;
   int i = 0;
@@ -30,12 +37,6 @@ void setup() {
   }
   if(i != 24){
     load = false;
-  }
-  if(load){
-    myRobotWorld = new World(data[0][0],data[0][1]);
-  }
-  else{
-    myRobotWorld = new World(12,12);
   }
 }
 
@@ -193,7 +194,14 @@ class World {
       myObjective =  new Objective(11, 11, 40, widthPerBlock, heightPerBlock); //instance myObject at 11,11 size =40 ,and send width,heigh per block
       myWall = new Wall[20];  //Initialization Wall array
     for (int i=0; i<20; i++) {
-      myWall[i] = new Wall((int)random(0, 12), (int)(random(0, 11)), 40, widthPerBlock, heightPerBlock); //random wall position
+      int x = (int)random(0, 12);
+      int y = (int)random(0, 12);
+      if (x != myRobot.getRow() && y != myRobot.getColumn() && x != myObjective.getRow() && y != myObjective.getColumn() ) {
+        myWall[i] = new Wall(x, y, 40, widthPerBlock, heightPerBlock); //random wall position
+      }
+      else{
+      i--;
+      }
     }
     }
 
