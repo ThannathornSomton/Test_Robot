@@ -1,7 +1,42 @@
 World myRobotWorld;  //Set myRobotWorld as object of World
+boolean save = true;
+int[][] data = new int[23][2];
+float[][] data1 = new float[1][2];
 void setup() {
   size(720, 720);
-  myRobotWorld = new World(12, 12);     //Instance World that have 12*12 size
+  BufferedReader reader = createReader("SaveWorld.txt");
+  String line = null;
+  int i = 0;
+  try {
+    while ((line = reader.readLine()) != null) {
+      String[] pieces = split(line,",");
+      if(i < 22){
+      data[i][0] = int(pieces[0]);
+      data[i][1] = int(pieces[1]);}
+      else{
+      data1[0][0] = float(pieces[0]);
+      data1[0][1] = float(pieces[1]);}
+      i++;
+    }
+    reader.close();
+  }
+  catch (NullPointerException e) {
+    e.printStackTrace();
+    save = false;
+  }
+  catch (IOException e) {
+    e.printStackTrace();
+    save = false;
+  }
+  if(i != 24){
+    save = false;
+  }
+  if(save){
+    myRobotWorld = new World(data[0][0],data[0][1]);
+  }
+  else{
+    myRobotWorld = new World(12,12);
+  }
 }
 
 void draw() {
@@ -19,8 +54,8 @@ class Robot {
   int row, column, size;     //Set row, column, size as attribute
   float heightPerBlock, widthPerBlock, radian;  //Set height,wieght per block and degree as attribute
 
-  Robot(int row, int column, int size, float widthPerBlock, float heightPerBlock) {
-    radian = 0;                //set start degree is 0 radian
+  Robot(int row, int column, int size, float widthPerBlock, float heightPerBlock,float radian) {
+    this.radian = radian;                //set start degree is 0 radian
     this.row = row;
     this.column = column;
     this.size = size;
@@ -144,11 +179,22 @@ class World {
     heightPerBlock = height/column; //calculate height,width per block
     widthPerBlock = width/row;
 
-    myRobot = new Robot(1, 2, 40, widthPerBlock, heightPerBlock);    //instance myRobot at 1,2 size =40 ,and send width,heigh per block
-    myObjective =  new Objective(11, 11, 40, widthPerBlock, heightPerBlock); //instance myObject at 11,11 size =40 ,and send width,heigh per block
-    myWall = new Wall[20];  //Initialization Wall array
+    if(save){
+      myRobot = new Robot(data[1][0],data[1][1], 40, widthPerBlock, heightPerBlock,data1[0][0]);    //instance myRobot at 1,2 size =40 ,and send width,heigh per block
+      myObjective =  new Objective(data[2][0],data[2][0], 40, widthPerBlock, heightPerBlock); //instance myObject at 11,11 size =40 ,and send width,heigh per block
+      myWall = new Wall[20];  //Initialization Wall array
+      for (int i=3; i<23; i++) {
+        myWall[i-3] = new Wall(data[i][0],data[i][1] , 40, widthPerBlock, heightPerBlock); //random wall position
+        
+    }     
+    }
+    else{
+      myRobot = new Robot(1, 2, 40, widthPerBlock, heightPerBlock,0);    //instance myRobot at 1,2 size =40 ,and send width,heigh per block
+      myObjective =  new Objective(11, 11, 40, widthPerBlock, heightPerBlock); //instance myObject at 11,11 size =40 ,and send width,heigh per block
+      myWall = new Wall[20];  //Initialization Wall array
     for (int i=0; i<20; i++) {
       myWall[i] = new Wall((int)random(0, 12), (int)(random(0, 11)), 40, widthPerBlock, heightPerBlock); //random wall position
+    }
     }
 
   }
@@ -221,6 +267,18 @@ class World {
     } else if (key == 'd' || key == 'D') {
       myRobot.turn(1);
     }
+      PrintWriter output;
+      output = createWriter("SaveWorld.txt"); 
+      output.println(this.row+","+this.column);
+      output.println(myRobot.row+","+myRobot.column);
+      output.println(myObjective.row+","+myObjective.column);
+      for (Wall eachWall : myWall) {
+        output.println(eachWall.row+","+eachWall.column);      
+      }
+      println(myRobot.radian);
+      output.println(myRobot.radian+","+0);
+      output.flush();
+      output.close();
   }
 
   boolean targetCheck(){
