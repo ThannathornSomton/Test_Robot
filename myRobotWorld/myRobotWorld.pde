@@ -1,5 +1,5 @@
 World myRobotWorld;  //Set myRobotWorld as object of World
-boolean save = true;
+boolean load = true;
 int[][] data = new int[23][2];
 float[][] data1 = new float[1][2];
 void setup() {
@@ -22,16 +22,16 @@ void setup() {
   }
   catch (NullPointerException e) {
     e.printStackTrace();
-    save = false;
+    load = false;
   }
   catch (IOException e) {
     e.printStackTrace();
-    save = false;
+    load = false;
   }
   if(i != 24){
-    save = false;
+    load = false;
   }
-  if(save){
+  if(load){
     myRobotWorld = new World(data[0][0],data[0][1]);
   }
   else{
@@ -179,14 +179,14 @@ class World {
     heightPerBlock = height/column; //calculate height,width per block
     widthPerBlock = width/row;
 
-    if(save){
+    if(load){
       myRobot = new Robot(data[1][0],data[1][1], 40, widthPerBlock, heightPerBlock,data1[0][0]);    //instance myRobot at 1,2 size =40 ,and send width,heigh per block
       myObjective =  new Objective(data[2][0],data[2][0], 40, widthPerBlock, heightPerBlock); //instance myObject at 11,11 size =40 ,and send width,heigh per block
       myWall = new Wall[20];  //Initialization Wall array
       for (int i=3; i<23; i++) {
         myWall[i-3] = new Wall(data[i][0],data[i][1] , 40, widthPerBlock, heightPerBlock); //random wall position
-        
-    }     
+      }
+      load = false;
     }
     else{
       myRobot = new Robot(1, 2, 40, widthPerBlock, heightPerBlock,0);    //instance myRobot at 1,2 size =40 ,and send width,heigh per block
@@ -267,21 +267,32 @@ class World {
     } else if (key == 'd' || key == 'D') {
       myRobot.turn(1);
     }
-      PrintWriter output;
-      output = createWriter("SaveWorld.txt"); 
-      output.println(this.row+","+this.column);
-      output.println(myRobot.row+","+myRobot.column);
-      output.println(myObjective.row+","+myObjective.column);
-      for (Wall eachWall : myWall) {
-        output.println(eachWall.row+","+eachWall.column);      
-      }
-      println(myRobot.radian);
-      output.println(myRobot.radian+","+0);
-      output.flush();
-      output.close();
+    if(targetCheck()){restartGame();}
+    saveGame();
+  }
+  void saveGame(){
+    PrintWriter output;
+    output = createWriter("SaveWorld.txt"); 
+    output.println(this.row+","+this.column);
+    output.println(myRobot.row+","+myRobot.column);
+    output.println(myObjective.row+","+myObjective.column);
+    for (Wall eachWall : myWall) {
+      output.println(eachWall.row+","+eachWall.column);      
+    }
+    println(myRobot.radian);
+    output.println(myRobot.radian+","+0);
+    output.flush();
+    output.close();
+  }
+  
+  boolean targetCheck(){
+    if (myRobot.row == myObjective.row && myRobot.column == myObjective.column){
+      return true;
+    }
+    return false;
   }
 
-  boolean targetCheck(){
-    return true;
+  void restartGame(){
+    myRobotWorld = new World(12,12);
   }
 }
