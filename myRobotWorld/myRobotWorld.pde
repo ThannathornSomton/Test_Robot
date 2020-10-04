@@ -1,7 +1,6 @@
 World myRobotWorld;  //Set myRobotWorld as object of World
 boolean load = true;
-int[][] data = new int[23][2];
-float[][] data1 = new float[1][2];
+int[][] data = new int[24][2];
 
 void setup() {
   size(720, 720);
@@ -17,14 +16,9 @@ void readFile(){
   try {
     while ((line = reader.readLine()) != null) {
       String[] pieces = split(line,",");
-      if(i < 22){
       data[i][0] = int(pieces[0]);
-      data[i][1] = int(pieces[1]);}
-      else{
-      data1[0][0] = float(pieces[0]);
-      data1[0][1] = float(pieces[1]);}
-      i++;
-    }
+      data[i][1] = int(pieces[1]);
+      i++;}
     reader.close();
   }
   catch (NullPointerException e) {
@@ -52,51 +46,70 @@ void keyReleased(){
 }
 
 class Robot {
-  int row, column, size;     //Set row, column, size as attribute
-  float heightPerBlock, widthPerBlock, radian;  //Set height,wieght per block and degree as attribute
+  int row, column, size, costume;     //Set row, column, size as attribute
+  float heightPerBlock, widthPerBlock;  //Set height,wieght per block and degree as attribute
 
-  Robot(int row, int column, int size, float widthPerBlock, float heightPerBlock,float radian) {
-    this.radian = radian;                //set start degree is 0 radian
+  Robot(int row, int column, int size, float widthPerBlock, float heightPerBlock, int costume) {
     this.row = row;
     this.column = column;
     this.size = size;
     this.widthPerBlock = widthPerBlock;
     this.heightPerBlock = heightPerBlock;
+    this.costume = costume;
   }
 
-  void move(int args) {    //move method to move row with args
-     if (cos(radian) == 1) {
-       //print(row);
-       row += args;
-     } else if (cos(radian) == -1) {
-       //print(row);
-       row -= args;
-     } else if (sin(radian) == 1) {
-       //print(column);
-       column += args;
-     } else if (sin(radian) == -1) {
-       //print(column);
-       column -= args;
-     }
-   }
+  void move() {    //move method to move depend on how it look
+     if (costume == 1) {
+      //print(row);
+      row += 1;
+    } else if (costume == 3) {
+      //print(row);
+      row -= 1;
+    } else if (costume == 2) {
+      //print(column);
+      column += 1;
+    } else if (costume == 4) {
+      //print(column);
+      column -= 1;
+    }
+  }
 
-   void turn(int args) {   //turn method to turn column with args
-     radian += asin(args);  //calculate new degree
-   }
+  void turnLeft() {
+    if (costume == 1){
+      costume = 4;
+    } else {
+      costume -= 1;
+    }
+  }
+  
+  void turnRight() {
+    if (costume == 4) {
+      costume = 1;
+    } else {
+      costume += 1;
+    }
+  }
 
   void drawRobot() {   //draw robot
-    fill(255);
-    ellipse(widthPerBlock*row + widthPerBlock/2, heightPerBlock*column + heightPerBlock/2, size, size);
-    stroke(245);
-    strokeWeight(10);
-    line(widthPerBlock*row + widthPerBlock/2+cos(radian-PI/3)*size/2, heightPerBlock*column + heightPerBlock/2+sin(radian-PI/3)*size/2,
-      widthPerBlock*row + widthPerBlock/2+cos(radian-PI/4)*(size), heightPerBlock*column + heightPerBlock/2+sin(radian-PI/4)*size);
-    line(widthPerBlock*row + widthPerBlock/2+cos(radian+PI/3)*size/2, heightPerBlock*column + heightPerBlock/2+sin(radian+PI/3)*size/2,
-      widthPerBlock*row + widthPerBlock/2+cos(radian+PI/4)*(size), heightPerBlock*column + heightPerBlock/2+sin(radian+PI/4)*size);
-    noStroke();
-    fill(0);
-    ellipse(widthPerBlock*row + widthPerBlock/2+cos(radian-PI/3)*size/4, heightPerBlock*column + heightPerBlock/2+sin(radian-PI/3)*size/4, size/4, size/4);
-    ellipse(widthPerBlock*row + widthPerBlock/2+cos(radian+PI/3)*size/4, heightPerBlock*column + heightPerBlock/2+sin(radian+PI/3)*size/4, size/4, size/4);
+    stroke(155, 100, 255);
+    strokeWeight(2.5);
+    if (costume == 1) {
+      line(widthPerBlock*row, heightPerBlock*column, widthPerBlock*row + widthPerBlock, heightPerBlock*column + heightPerBlock/2);
+      line(widthPerBlock*row, heightPerBlock*column + heightPerBlock, widthPerBlock*row + widthPerBlock, heightPerBlock*column + heightPerBlock/2);
+      line(widthPerBlock*row, heightPerBlock*column, widthPerBlock*row, heightPerBlock*column + heightPerBlock);
+    } else if (costume == 2) {
+      line(widthPerBlock*row, heightPerBlock*column, widthPerBlock*row + widthPerBlock/2, heightPerBlock*column + heightPerBlock);
+      line(widthPerBlock*row + widthPerBlock, heightPerBlock*column, widthPerBlock*row + widthPerBlock/2, heightPerBlock*column + heightPerBlock);
+      line(widthPerBlock*row, heightPerBlock*column, widthPerBlock*row + widthPerBlock, heightPerBlock*column);
+    } else if (costume == 3) {
+      line(widthPerBlock*row + widthPerBlock, heightPerBlock*column, widthPerBlock*row, heightPerBlock*column + heightPerBlock/2);
+      line(widthPerBlock*row + widthPerBlock, heightPerBlock*column + heightPerBlock, widthPerBlock*row, heightPerBlock*column + heightPerBlock/2);
+      line(widthPerBlock*row + widthPerBlock, heightPerBlock*column, widthPerBlock*row + widthPerBlock, heightPerBlock*column + heightPerBlock);
+    } else if (costume == 4) {
+      line(widthPerBlock*row, heightPerBlock*column + heightPerBlock, widthPerBlock*row + widthPerBlock/2, heightPerBlock*column);
+      line(widthPerBlock*row + widthPerBlock, heightPerBlock*column + heightPerBlock, widthPerBlock*row + widthPerBlock/2, heightPerBlock*column);
+      line(widthPerBlock*row, heightPerBlock*column + heightPerBlock, widthPerBlock*row + widthPerBlock, heightPerBlock*column + heightPerBlock);
+    }
   }
 
   int getRow() {
@@ -107,8 +120,8 @@ class Robot {
     return column;
   }
   
-  float getRadian() {
-    return radian;
+  float getCostume() {
+    return costume;
   }
 }
 
@@ -181,7 +194,7 @@ class World {
     widthPerBlock = width/row;
 
     if(load){
-      myRobot = new Robot(data[1][0],data[1][1], 40, widthPerBlock, heightPerBlock,data1[0][0]);    //instance myRobot at 1,2 size =40 ,and send width,heigh per block
+      myRobot = new Robot(data[1][0],data[1][1], 40, widthPerBlock, heightPerBlock,data[23][0]);    //instance myRobot at 1,2 size =40 ,and send width,heigh per block
       myObjective =  new Objective(data[2][0],data[2][0], 40, widthPerBlock, heightPerBlock); //instance myObject at 11,11 size =40 ,and send width,heigh per block
       myWall = new Wall[20];  //Initialization Wall array
       for (int i=3; i<23; i++) {
@@ -190,7 +203,7 @@ class World {
       load = false;
     }
     else{
-      myRobot = new Robot(1, 2, 40, widthPerBlock, heightPerBlock,0);    //instance myRobot at 1,2 size =40 ,and send width,heigh per block
+      myRobot = new Robot(1, 2, 40, widthPerBlock, heightPerBlock,1);    //instance myRobot at 1,2 size =40 ,and send width,heigh per block
       myObjective =  new Objective(11, 11, 40, widthPerBlock, heightPerBlock); //instance myObject at 11,11 size =40 ,and send width,heigh per block
       myWall = new Wall[20];  //Initialization Wall array
     for (int i=0; i<20; i++) {
@@ -228,52 +241,30 @@ class World {
   void updateWorld(){
     if (key == 'w' || key == 'W') {
       for (int i = 0; i<20; i++) {
-        if (cos(myRobot.radian) == 1 && myRobot.getRow()+1 == myWall[i].getRow() && myRobot.getColumn() == myWall[i].getColumn()) {
+        if (myRobot.getCostume() == 1 && myRobot.getRow()+1 == myWall[i].getRow() && myRobot.getColumn() == myWall[i].getColumn()) {
           break;
-        } else if (cos(myRobot.radian) == -1 && myRobot.getRow()-1 == myWall[i].getRow() && myRobot.getColumn() == myWall[i].getColumn()) {
+        } else if (myRobot.getCostume() == 3 && myRobot.getRow()-1 == myWall[i].getRow() && myRobot.getColumn() == myWall[i].getColumn()) {
           break;
-        } else if (sin(myRobot.radian) == 1 && myRobot.getRow() == myWall[i].getRow() && myRobot.getColumn()+1 == myWall[i].getColumn()) {
+        } else if (myRobot.getCostume() == 2 && myRobot.getRow() == myWall[i].getRow() && myRobot.getColumn()+1 == myWall[i].getColumn()) {
           break;
-        } else if (sin(myRobot.radian) == -1 && myRobot.getRow() == myWall[i].getRow() && myRobot.getColumn()-1 == myWall[i].getColumn()) {
+        } else if (myRobot.getCostume() == 4 && myRobot.getRow() == myWall[i].getRow() && myRobot.getColumn()-1 == myWall[i].getColumn()) {
           break;
-        } else if (cos(myRobot.radian) == 1 && myRobot.getRow()+1 == row) {
+        } else if (myRobot.getCostume() == 1 && myRobot.getRow()+1 == row) {
           break;
-        } else if (cos(myRobot.radian) == -1 && myRobot.getRow()-1 < 0) {
+        } else if (myRobot.getCostume() == 3 && myRobot.getRow()-1 < 0) {
           break;
-        } else if (sin(myRobot.radian) == 1 && myRobot.getColumn()+1 == column) {
+        } else if (myRobot.getCostume() == 2 && myRobot.getColumn()+1 == column) {
           break;
-        } else if (sin(myRobot.radian) == -1 && myRobot.getColumn()-1 < 0) {
-          break;
-        } else if (i == 19) {
-          myRobot.move(1);
-        }
-      }
-    } else if (key == 's' || key == 'S') {
-      for (int i = 0; i<20; i++) {
-        if (cos(myRobot.radian) == 1 && myRobot.getRow()-1 == myWall[i].getRow() && myRobot.getColumn() == myWall[i].getColumn()) {
-          break;
-        } else if (cos(myRobot.radian) == -1 && myRobot.getRow()+1 == myWall[i].getRow() && myRobot.getColumn() == myWall[i].getColumn()) {
-          break;
-        } else if (sin(myRobot.radian) == 1 && myRobot.getRow() == myWall[i].getRow() && myRobot.getColumn()-1 == myWall[i].getColumn()) {
-          break;
-        } else if (sin(myRobot.radian) == -1 && myRobot.getRow() == myWall[i].getRow() && myRobot.getColumn()+1 == myWall[i].getColumn()) {
-          break;
-        } else if (cos(myRobot.radian) == 1 && myRobot.getRow()-1 < 0) {
-          break;
-        } else if (cos(myRobot.radian) == -1 && myRobot.getRow()+1 == row) {
-          break;
-        } else if (sin(myRobot.radian) == 1 && myRobot.getColumn()-1 < 0) {
-          break;
-        } else if (sin(myRobot.radian) == -1 && myRobot.getColumn()+1 == column) {
+        } else if (myRobot.getCostume() == 4 && myRobot.getColumn()-1 < 0) {
           break;
         } else if (i == 19) {
-          myRobot.move(-1);
+          myRobot.move();
         }
       }
     } else if (key == 'a' || key == 'A') {
-      myRobot.turn(-1);
+      myRobot.turnLeft();
     } else if (key == 'd' || key == 'D') {
-      myRobot.turn(1);
+      myRobot.turnRight();
     }
     if(targetCheck()){restartGame();}
     saveGame();
@@ -287,8 +278,7 @@ class World {
     for (Wall eachWall : myWall) {
       output.println(eachWall.row+","+eachWall.column);      
     }
-    println(myRobot.radian);
-    output.println(myRobot.radian+","+0);
+    output.println(myRobot.getCostume()+","+0);
     output.flush();
     output.close();
   }
