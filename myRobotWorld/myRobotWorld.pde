@@ -1,6 +1,7 @@
 World myRobotWorld;  //Set myRobotWorld as object of World
 boolean load = true;
 int[][] data = new int[24][2];
+char[] Key = new char[3];
 
 void setup() {
   size(720, 720);
@@ -15,10 +16,16 @@ void readFile(){
   int i = 0;
   try {
     while ((line = reader.readLine()) != null) {
-      String[] pieces = split(line,",");
-      data[i][0] = int(pieces[0]);
-      data[i][1] = int(pieces[1]);
-      i++;}
+      if (i < 24) {
+        String[] pieces = split(line,",");
+        data[i][0] = int(pieces[0]);
+        data[i][1] = int(pieces[1]);
+      } else {
+        String[] pieces = split(line,"=");
+        Key[i-24] = pieces[1].charAt(0);
+      }
+      i++;
+    }
     reader.close();
   }
   catch (NullPointerException e) {
@@ -29,7 +36,7 @@ void readFile(){
     e.printStackTrace();
     load = false;
   }
-  if(i != 24){
+  if(i != 27){
     load = false;
   }
 }
@@ -186,6 +193,7 @@ class World {
   Robot myRobot;        //set myRobot that is Robot object as attribute
   Objective myObjective;  //set myObject that is Objective object as attribute
   Wall[] myWall;         //set myWall that is Wall[] object as attribute
+  InputProcessor Input;
 
   World(int row, int column) {
     this.row = row;
@@ -200,22 +208,28 @@ class World {
       for (int i=3; i<23; i++) {
         myWall[i-3] = new Wall(data[i][0],data[i][1] , 40, widthPerBlock, heightPerBlock); //random wall position
       }
+      Input = new InputProcessor(Key[0], Key[1], Key[2]);
       load = false;
     }
     else{
       myRobot = new Robot(1, 2, 40, widthPerBlock, heightPerBlock,1);    //instance myRobot at 1,2 size =40 ,and send width,heigh per block
       myObjective =  new Objective(11, 11, 40, widthPerBlock, heightPerBlock); //instance myObject at 11,11 size =40 ,and send width,heigh per block
       myWall = new Wall[20];  //Initialization Wall array
-    for (int i=0; i<20; i++) {
-      int x = (int)random(0, 12);
-      int y = (int)random(0, 12);
-      if (x != myRobot.getRow() && y != myRobot.getColumn() && x != myObjective.getRow() && y != myObjective.getColumn() ) {
-        myWall[i] = new Wall(x, y, 40, widthPerBlock, heightPerBlock); //random wall position
+      for (int i=0; i<20; i++) {
+        int x = (int)random(0, 12);
+        int y = (int)random(0, 12);
+        if (x != myRobot.getRow() && y != myRobot.getColumn() && x != myObjective.getRow() && y != myObjective.getColumn() ) {
+          myWall[i] = new Wall(x, y, 40, widthPerBlock, heightPerBlock); //random wall position
+        }
+        else{
+        i--;
+        }
       }
-      else{
-      i--;
+      if (Key[0] == 0) {
+        Input = new InputProcessor('w', 'a', 'd');
+      } else {
+        Input = new InputProcessor(Key[0], Key[1], Key[2]);
       }
-    }
     }
 
   }
@@ -239,7 +253,7 @@ class World {
   }
 
   void updateWorld(){
-    if (key == 'w' || key == 'W') {
+    if (key == Input.getMoveKey()) {
       for (int i = 0; i<20; i++) {
         if (myRobot.getCostume() == 1 && myRobot.getRow()+1 == myWall[i].getRow() && myRobot.getColumn() == myWall[i].getColumn()) {
           break;
@@ -261,9 +275,9 @@ class World {
           myRobot.move();
         }
       }
-    } else if (key == 'a' || key == 'A') {
+    } else if (key == Input.getLeftKey()) {
       myRobot.turnLeft();
-    } else if (key == 'd' || key == 'D') {
+    } else if (key == Input.getRightKey()) {
       myRobot.turnRight();
     }
     if(targetCheck()){restartGame();}
@@ -279,6 +293,9 @@ class World {
       output.println(eachWall.row+","+eachWall.column);      
     }
     output.println(myRobot.getCostume()+","+0);
+    output.println("Move="+Input.getMoveKey());
+    output.println("Turn Left="+Input.getLeftKey());
+    output.println("Turn Right="+Input.getRightKey());
     output.flush();
     output.close();
   }
@@ -292,5 +309,26 @@ class World {
 
   void restartGame(){
     myRobotWorld = new World(12,12);
+  }
+}
+
+class InputProcessor {
+  char moveKey, turnLeftKey, turnRightKey;
+  InputProcessor(char move, char turnLeft, char turnRight){
+    this.moveKey = move;
+    this.turnLeftKey = turnLeft;
+    this.turnRightKey = turnRight;
+  }
+  
+  char getMoveKey(){
+    return moveKey;
+  }
+  
+  char getLeftKey(){
+    return turnLeftKey;
+  }
+  
+  char getRightKey(){
+    return turnRightKey;
   }
 }
