@@ -1,44 +1,8 @@
 World myRobotWorld;  //Set myRobotWorld as object of World
-boolean load = true;
-int[][] data = new int[24][2];
-char[] Key = new char[3];
 
 void setup() {
   size(720, 720);
-  readFile();
-  if(load){myRobotWorld = new World(data[0][0],data[0][1]);}
-  else{myRobotWorld = new World(12,12);}
-}
-
-void readFile(){
-  BufferedReader reader = createReader("SaveWorld.txt");
-  String line = null;
-  int i = 0;
-  try {
-    while ((line = reader.readLine()) != null) {
-      if (i < 24) {
-        String[] pieces = split(line,",");
-        data[i][0] = int(pieces[0]);
-        data[i][1] = int(pieces[1]);
-      } else {
-        String[] pieces = split(line,"=");
-        Key[i-24] = pieces[1].charAt(0);
-      }
-      i++;
-    }
-    reader.close();
-  }
-  catch (NullPointerException e) {
-    e.printStackTrace();
-    load = false;
-  }
-  catch (IOException e) {
-    e.printStackTrace();
-    load = false;
-  }
-  if(i != 27){
-    load = false;
-  }
+  myRobotWorld = new World("SaveWorld.txt");
 }
 
 void draw() {
@@ -190,23 +154,80 @@ class World {
   int row, column; //set row, column as attribute
   float widthPerBlock;  //set height,width as attribute
   float heightPerBlock;
+  boolean load = true;
+  int[][] load_data = new int[24][2];
+  char[] Key = new char[3];
   Robot myRobot;        //set myRobot that is Robot object as attribute
   Objective myObjective;  //set myObject that is Objective object as attribute
   Wall[] myWall;         //set myWall that is Wall[] object as attribute
   InputProcessor Input;
+
 
   World(int row, int column) {
     this.row = row;
     this.column = column;
     heightPerBlock = height/column; //calculate height,width per block
     widthPerBlock = width/row;
-
+    myRobot = new Robot(1, 2, 40, widthPerBlock, heightPerBlock,1);    //instance myRobot at 1,2 size =40 ,and send width,heigh per block
+    myObjective =  new Objective(11, 11, 40, widthPerBlock, heightPerBlock); //instance myObject at 11,11 size =40 ,and send width,heigh per block
+    myWall = new Wall[20];  //Initialization Wall array
+    for (int i=0; i<20; i++) {
+      int x = (int)random(0, 12);
+      int y = (int)random(0, 12);
+      if (x != myRobot.getRow() && y != myRobot.getColumn() && x != myObjective.getRow() && y != myObjective.getColumn() ) {
+        myWall[i] = new Wall(x, y, 40, widthPerBlock, heightPerBlock); //random wall position
+      }
+      else{
+      i--;
+      }
+    }
+    if (Key[0] == 0) {
+      Input = new InputProcessor('w', 'a', 'd');
+    }else {
+      Input = new InputProcessor(Key[0], Key[1], Key[2]);
+     }
+  }
+  
+  World(String name){
+    BufferedReader reader = createReader(name);
+    String line = null;
+    int count = 0;
+    try {
+      while ((line = reader.readLine()) != null) {
+        if (count < 24) {
+          String[] pieces = split(line,",");
+          load_data[count][0] = int(pieces[0]);
+          load_data[count][1] = int(pieces[1]);
+        } else {
+          String[] pieces = split(line,"=");
+          Key[count-24] = pieces[1].charAt(0);
+        }
+        count++;
+      }
+      reader.close();
+    }
+    catch (NullPointerException e) {
+      e.printStackTrace();
+      load = false;
+    }
+    catch (IOException e) {
+      e.printStackTrace();
+      load = false;
+    }
+    if(count != 27){
+      load = false;
+    }
+    
+    this.row = load_data[0][0];
+    this.column = load_data[0][1];
+    heightPerBlock = height/load_data[0][1]; //calculate height,width per block
+    widthPerBlock = width/load_data[0][0];
     if(load){
-      myRobot = new Robot(data[1][0],data[1][1], 40, widthPerBlock, heightPerBlock,data[23][0]);    //instance myRobot at 1,2 size =40 ,and send width,heigh per block
-      myObjective =  new Objective(data[2][0],data[2][0], 40, widthPerBlock, heightPerBlock); //instance myObject at 11,11 size =40 ,and send width,heigh per block
+      myRobot = new Robot(load_data[1][0],load_data[1][1], 40, widthPerBlock, heightPerBlock,load_data[23][0]);    //instance myRobot at 1,2 size =40 ,and send width,heigh per block
+      myObjective =  new Objective(load_data[2][0],load_data[2][0], 40, widthPerBlock, heightPerBlock); //instance myObject at 11,11 size =40 ,and send width,heigh per block
       myWall = new Wall[20];  //Initialization Wall array
       for (int i=3; i<23; i++) {
-        myWall[i-3] = new Wall(data[i][0],data[i][1] , 40, widthPerBlock, heightPerBlock); //random wall position
+        myWall[i-3] = new Wall(load_data[i][0],load_data[i][1] , 40, widthPerBlock, heightPerBlock); //random wall position
       }
       Input = new InputProcessor(Key[0], Key[1], Key[2]);
       load = false;
@@ -231,7 +252,9 @@ class World {
         Input = new InputProcessor(Key[0], Key[1], Key[2]);
       }
     }
-
+    
+    
+    
   }
 
   void drawLine() { //draw line
