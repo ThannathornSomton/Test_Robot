@@ -53,66 +53,66 @@ void keyReleased(){
 }
 
 class Robot {
-  int row, column, size, costume;     //Set row, column, size as attribute
+  int row, column, size, direction;     //Set row, column, size as attribute
   float heightPerBlock, widthPerBlock;  //Set height,wieght per block and degree as attribute
 
-  Robot(int row, int column, int size, float widthPerBlock, float heightPerBlock, int costume) {
+  Robot(int row, int column, int size, float widthPerBlock, float heightPerBlock, int direction) {
     this.row = row;
     this.column = column;
     this.size = size;
     this.widthPerBlock = widthPerBlock;
     this.heightPerBlock = heightPerBlock;
-    this.costume = costume;
+    this.direction = direction;
   }
 
   void move() {    //move method to move depend on how it look
-     if (costume == 1) {
+     if (direction == 1) {
       //print(row);
       row += 1;
-    } else if (costume == 3) {
+    } else if (direction == 3) {
       //print(row);
       row -= 1;
-    } else if (costume == 2) {
+    } else if (direction == 2) {
       //print(column);
       column += 1;
-    } else if (costume == 4) {
+    } else if (direction == 4) {
       //print(column);
       column -= 1;
     }
   }
 
   void turnLeft() {
-    if (costume == 1){
-      costume = 4;
+    if (direction == 1){
+      direction = 4;
     } else {
-      costume -= 1;
+      direction -= 1;
     }
   }
   
   void turnRight() {
-    if (costume == 4) {
-      costume = 1;
+    if (direction == 4) {
+      direction = 1;
     } else {
-      costume += 1;
+      direction += 1;
     }
   }
 
   void drawRobot() {   //draw robot
     stroke(155, 100, 255);
     strokeWeight(2.5);
-    if (costume == 1) {
+    if (direction == 1) {
       line(widthPerBlock*row, heightPerBlock*column, widthPerBlock*row + widthPerBlock, heightPerBlock*column + heightPerBlock/2);
       line(widthPerBlock*row, heightPerBlock*column + heightPerBlock, widthPerBlock*row + widthPerBlock, heightPerBlock*column + heightPerBlock/2);
       line(widthPerBlock*row, heightPerBlock*column, widthPerBlock*row, heightPerBlock*column + heightPerBlock);
-    } else if (costume == 2) {
+    } else if (direction == 2) {
       line(widthPerBlock*row, heightPerBlock*column, widthPerBlock*row + widthPerBlock/2, heightPerBlock*column + heightPerBlock);
       line(widthPerBlock*row + widthPerBlock, heightPerBlock*column, widthPerBlock*row + widthPerBlock/2, heightPerBlock*column + heightPerBlock);
       line(widthPerBlock*row, heightPerBlock*column, widthPerBlock*row + widthPerBlock, heightPerBlock*column);
-    } else if (costume == 3) {
+    } else if (direction == 3) {
       line(widthPerBlock*row + widthPerBlock, heightPerBlock*column, widthPerBlock*row, heightPerBlock*column + heightPerBlock/2);
       line(widthPerBlock*row + widthPerBlock, heightPerBlock*column + heightPerBlock, widthPerBlock*row, heightPerBlock*column + heightPerBlock/2);
       line(widthPerBlock*row + widthPerBlock, heightPerBlock*column, widthPerBlock*row + widthPerBlock, heightPerBlock*column + heightPerBlock);
-    } else if (costume == 4) {
+    } else if (direction == 4) {
       line(widthPerBlock*row, heightPerBlock*column + heightPerBlock, widthPerBlock*row + widthPerBlock/2, heightPerBlock*column);
       line(widthPerBlock*row + widthPerBlock, heightPerBlock*column + heightPerBlock, widthPerBlock*row + widthPerBlock/2, heightPerBlock*column);
       line(widthPerBlock*row, heightPerBlock*column + heightPerBlock, widthPerBlock*row + widthPerBlock, heightPerBlock*column + heightPerBlock);
@@ -127,8 +127,8 @@ class Robot {
     return column;
   }
   
-  float getCostume() {
-    return costume;
+  float getDirection() {
+    return direction;
   }
 }
 
@@ -253,36 +253,11 @@ class World {
   }
 
   void updateWorld(){
-    if (key == Input.getMoveKey()) {
-      for (int i = 0; i<20; i++) {
-        if (myRobot.getCostume() == 1 && myRobot.getRow()+1 == myWall[i].getRow() && myRobot.getColumn() == myWall[i].getColumn()) {
-          break;
-        } else if (myRobot.getCostume() == 3 && myRobot.getRow()-1 == myWall[i].getRow() && myRobot.getColumn() == myWall[i].getColumn()) {
-          break;
-        } else if (myRobot.getCostume() == 2 && myRobot.getRow() == myWall[i].getRow() && myRobot.getColumn()+1 == myWall[i].getColumn()) {
-          break;
-        } else if (myRobot.getCostume() == 4 && myRobot.getRow() == myWall[i].getRow() && myRobot.getColumn()-1 == myWall[i].getColumn()) {
-          break;
-        } else if (myRobot.getCostume() == 1 && myRobot.getRow()+1 == row) {
-          break;
-        } else if (myRobot.getCostume() == 3 && myRobot.getRow()-1 < 0) {
-          break;
-        } else if (myRobot.getCostume() == 2 && myRobot.getColumn()+1 == column) {
-          break;
-        } else if (myRobot.getCostume() == 4 && myRobot.getColumn()-1 < 0) {
-          break;
-        } else if (i == 19) {
-          myRobot.move();
-        }
-      }
-    } else if (key == Input.getLeftKey()) {
-      myRobot.turnLeft();
-    } else if (key == Input.getRightKey()) {
-      myRobot.turnRight();
-    }
+    Input.checkMove(key, row, column, myRobot, myWall, 20);
     if(targetCheck()){restartGame();}
     saveGame();
   }
+  
   void saveGame(){
     PrintWriter output;
     output = createWriter("SaveWorld.txt"); 
@@ -292,7 +267,7 @@ class World {
     for (Wall eachWall : myWall) {
       output.println(eachWall.row+","+eachWall.column);      
     }
-    output.println(myRobot.getCostume()+","+0);
+    output.println(myRobot.getDirection()+","+0);
     output.println("Move="+Input.getMoveKey());
     output.println("Turn Left="+Input.getLeftKey());
     output.println("Turn Right="+Input.getRightKey());
@@ -318,6 +293,36 @@ class InputProcessor {
     this.moveKey = move;
     this.turnLeftKey = turnLeft;
     this.turnRightKey = turnRight;
+  }
+  
+  void checkMove(char inputKey, int worldRow, int worldColumn, Robot robot, Wall[] wall, int maxWall){
+    if (inputKey == moveKey) {
+      for (int i = 0; i<maxWall; i++) {
+        if (robot.getDirection() == 1 && robot.getRow()+1 == wall[i].getRow() && robot.getColumn() == wall[i].getColumn()) {
+          break;
+        } else if (robot.getDirection() == 3 && robot.getRow()-1 == wall[i].getRow() && robot.getColumn() == wall[i].getColumn()) {
+          break;
+        } else if (robot.getDirection() == 2 && robot.getRow() == wall[i].getRow() && robot.getColumn()+1 == wall[i].getColumn()) {
+          break;
+        } else if (robot.getDirection() == 4 && robot.getRow() == wall[i].getRow() && robot.getColumn()-1 == wall[i].getColumn()) {
+          break;
+        } else if (robot.getDirection() == 1 && robot.getRow()+1 == worldRow) {
+          break;
+        } else if (robot.getDirection() == 3 && robot.getRow()-1 < 0) {
+          break;
+        } else if (robot.getDirection() == 2 && robot.getColumn()+1 == worldColumn) {
+          break;
+        } else if (robot.getDirection() == 4 && robot.getColumn()-1 < 0) {
+          break;
+        } else if (i == 19) {
+          robot.move();
+        }
+      }
+    } else if (inputKey == turnLeftKey) {
+      robot.turnLeft();
+    } else if (inputKey == turnRightKey) {
+      robot.turnRight();
+    }
   }
   
   char getMoveKey(){
