@@ -15,6 +15,20 @@ void draw() {
 void keyReleased(){
   myRobotWorld.updateWorld();
 }
+class Snake{
+  int lenght;
+  float widthPerBlock,heightPerBlock;
+  Robot[] mySnake;
+  
+  Snake(){
+    this.widthPerBlock = myRobotWorld.widthPerBlock;
+    this.heightPerBlock = myRobotWorld.heightPerBlock;
+    lenght = 4;
+    mySnake = new Robot[lenght]; 
+    for(int i = 0;i < lenght; i++){
+    mySnake[i] = new Robot((3-i), 11, 40, widthPerBlock, heightPerBlock,1);}
+  }
+}
 
 class Robot {
   int row, column, size, direction;     //Set row, column, size as attribute
@@ -160,6 +174,7 @@ class World {
   Robot myRobot;        //set myRobot that is Robot object as attribute
   Objective myObjective;  //set myObject that is Objective object as attribute
   Wall[] myWall;         //set myWall that is Wall[] object as attribute
+  Snake realSnake;
   InputProcessor Input;
 
 
@@ -168,7 +183,7 @@ class World {
     this.column = column;
     heightPerBlock = height/column; //calculate height,width per block
     widthPerBlock = width/row;
-    myRobot = new Robot(1, 2, 40, widthPerBlock, heightPerBlock,1);    //instance myRobot at 1,2 size =40 ,and send width,heigh per block
+    realSnake = new Snake();
     myObjective =  new Objective(11, 11, 40, widthPerBlock, heightPerBlock); //instance myObject at 11,11 size =40 ,and send width,heigh per block
     myWall = new Wall[20];  //Initialization Wall array
     for (int i=0; i<20; i++) {
